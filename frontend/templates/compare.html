@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% set active_page = 'compare' %}
+
+{% block title %}Compare Resumes{% endblock %}
+{% block description %}Compare two versions of your resume to track ATS improvement and skill changes.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align:center; margin-bottom:32px;">
+        <h1 style="font-size:32px; font-weight:800;">🔄 Resume Comparison</h1>
+        <p style="color:var(--text-muted); margin-top:8px;">Upload two versions to track improvement</p>
+    </div>
+
+    <section class="card">
+        <h3>📄 Resume Version Comparison</h3>
+        <p style="color:var(--text-muted); margin-bottom:16px;">Upload two versions of your resume to track ATS score improvement</p>
+        <form action="/compare-analyze" method="POST" enctype="multipart/form-data" data-loading="Comparing resumes...">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="compare-grid">
+                <div>
+                    <label><b>📄 Resume Version 1 (Old)</b></label>
+                    <input type="file" name="resume_v1" accept=".pdf" required>
+                </div>
+                <div>
+                    <label><b>📄 Resume Version 2 (New)</b></label>
+                    <input type="file" name="resume_v2" accept=".pdf" required>
+                </div>
+                <div class="full-width">
+                    <label><b>📋 Optional Job Description</b></label>
+                    <textarea name="job_description" placeholder="Paste JD here for role-specific comparison (optional)"></textarea>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:28px;">
+                <button type="submit" class="btn large">
+                    <span class="btn-text">🔍 Compare Resumes</span>
+                    <span class="btn-spinner"></span>
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

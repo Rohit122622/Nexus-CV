@@ -1,0 +1,110 @@
+[
+  {
+    "role": "Software Engineer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Software Engineer with 4 years of experience building scalable backend systems using Python, Java, and cloud services. Led migration of monolithic API to microservices architecture reducing latency by 40%. Designed RESTful APIs handling 10K requests per second. Proficient in data structures, algorithms, Docker, Kubernetes, and CI/CD pipelines. BS Computer Science from State University."
+  },
+  {
+    "role": "Software Engineer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Full-time software engineer specializing in distributed systems and backend development. Built event-driven processing pipeline using Kafka and Redis, improving throughput by 3x. Experienced with PostgreSQL, MongoDB, AWS Lambda, and Terraform. Strong foundation in system design and object-oriented programming. MS Computer Science."
+  },
+  {
+    "role": "Data Scientist",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Data Scientist with 3 years of experience in machine learning, statistical modeling, and data analysis. Built customer churn prediction model using XGBoost achieving 92% accuracy. Proficient in Python, pandas, scikit-learn, TensorFlow, and SQL. Created dashboards in Tableau and Power BI for executive reporting. Published 2 papers on NLP applications."
+  },
+  {
+    "role": "Data Scientist",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Applied data scientist focused on NLP and recommendation systems. Developed product recommendation engine using collaborative filtering, increasing engagement by 25%. Experience with deep learning (PyTorch, transformers), A/B testing, and feature engineering. Proficient in Python, R, SQL, and cloud ML platforms (AWS SageMaker, GCP Vertex AI)."
+  },
+  {
+    "role": "Web Developer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Frontend web developer with 3 years building responsive single-page applications using React, TypeScript, and Next.js. Implemented design systems and component libraries reducing development time by 30%. Experience with REST APIs, GraphQL, Tailwind CSS, and testing frameworks (Jest, Cypress). Strong understanding of web accessibility and performance optimization."
+  },
+  {
+    "role": "Web Developer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Full stack web developer experienced in building production-ready web applications. Backend: Node.js, Express, Django. Frontend: React, Vue.js, HTML5, CSS3. Database: PostgreSQL, MongoDB, Redis. DevOps: Docker, Nginx, GitHub Actions. Built e-commerce platform serving 50K monthly active users. BS in Information Technology."
+  },
+  {
+    "role": "ML Engineer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Machine Learning Engineer with expertise in model deployment, MLOps, and production ML systems. Built end-to-end ML pipelines using Kubeflow and MLflow. Deployed transformer models serving 5K predictions per minute using ONNX Runtime and TensorRT. Proficient in Python, PyTorch, TensorFlow, Docker, and Kubernetes. Experience with model monitoring and A/B testing."
+  },
+  {
+    "role": "DevOps Engineer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "DevOps Engineer with 5 years managing cloud infrastructure and CI/CD pipelines. Managed AWS infrastructure (EC2, EKS, RDS, S3) serving 100K users. Implemented Infrastructure as Code using Terraform and CloudFormation. Built automated deployment pipelines with Jenkins, GitHub Actions, and ArgoCD. Proficient in Docker, Kubernetes, Linux, and monitoring tools (Prometheus, Grafana)."
+  },
+  {
+    "role": "Data Analyst",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Data Analyst with 2 years of experience in business intelligence and data visualization. Built automated reporting dashboards in Power BI and Tableau reducing report generation time by 60%. Proficient in SQL, Python, Excel, and statistical analysis. Conducted A/B tests and cohort analysis for marketing campaigns. BA in Economics with focus on quantitative methods."
+  },
+  {
+    "role": "Frontend Developer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Frontend Developer specializing in React ecosystem and modern CSS. Built responsive dashboards with React, Redux, and Material-UI. Implemented lazy loading and code splitting reducing initial load time by 45%. Experienced with TypeScript, Webpack, Vite, and testing with Jest and React Testing Library. Strong eye for design and UX principles."
+  },
+  {
+    "role": "Backend Developer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Backend Developer with 4 years building high-performance APIs and microservices. Designed payment processing system handling 1M daily transactions. Proficient in Python (FastAPI, Django), Go, PostgreSQL, Redis, and RabbitMQ. Experience with API design, database optimization, and distributed systems. Implemented rate limiting and security hardening for production APIs."
+  },
+  {
+    "role": "Cloud Engineer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Cloud Engineer certified in AWS Solutions Architect and Azure Administrator. Migrated on-premise infrastructure to AWS reducing costs by 35%. Implemented auto-scaling, load balancing, and disaster recovery strategies. Proficient in Terraform, CloudFormation, Docker, Kubernetes, and serverless architectures. Experience with security compliance (SOC2, HIPAA)."
+  },
+  {
+    "role": "Full Stack Developer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Full Stack Developer with 3 years building end-to-end web applications. Frontend: React, Next.js, TypeScript. Backend: Node.js, Express, Python (Flask). Database: PostgreSQL, MongoDB. Cloud: AWS (EC2, S3, Lambda). Built real-time collaborative editing tool using WebSockets. Implemented OAuth, JWT authentication, and RBAC authorization systems."
+  },
+  {
+    "role": "Cybersecurity Analyst",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Cybersecurity Analyst with 3 years in threat detection, incident response, and vulnerability assessment. Conducted penetration testing and security audits for enterprise networks. Proficient in SIEM tools (Splunk, QRadar), network analysis (Wireshark), and scripting (Python, Bash). CompTIA Security+ and CEH certified. Experience with NIST and ISO 27001 frameworks."
+  },
+  {
+    "role": "Mobile Developer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Mobile Developer with 3 years building cross-platform and native mobile applications. Built fintech app with 100K downloads using React Native and Expo. Experience with Android (Kotlin), iOS (Swift), Firebase, and REST API integration. Implemented push notifications, in-app payments, and offline-first architecture. Published 4 apps on Google Play Store."
+  },
+  {
+    "role": "QA Engineer",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "QA Engineer with 3 years in test automation, CI/CD integration, and quality assurance. Built automated test suites using Selenium, Cypress, and Playwright covering 85% of critical flows. Experience with API testing (Postman, RestAssured), performance testing (JMeter), and mobile testing. Integrated tests into Jenkins and GitHub Actions pipelines. ISTQB certified."
+  },
+  {
+    "role": "Product Manager",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Product Manager with 4 years driving product strategy and execution for B2B SaaS products. Led cross-functional teams of 12 engineers and designers. Managed product roadmap resulting in 40% user growth and 25% revenue increase. Proficient in Agile/Scrum, data-driven decision making, stakeholder management, and user research. MBA with focus on Technology Management."
+  },
+  {
+    "role": "Database Administrator",
+    "category": "resume_example",
+    "type": "resume",
+    "text": "Database Administrator with 5 years managing enterprise database systems. Optimized PostgreSQL queries reducing average response time by 60%. Managed MySQL and MongoDB clusters handling 500GB of data. Experience with database replication, backup strategies, performance tuning, and migration. Proficient in SQL, PL/pgSQL, and database monitoring tools."
+  }
+]

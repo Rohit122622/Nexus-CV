@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block title %}Register{% endblock %}
+{% block description %}Create a Nexus CV account to access AI-powered resume analysis and building tools.{% endblock %}
+
+{% block content %}
+<div class="auth-box">
+    <div style="text-align:center; margin-bottom:8px;">
+        <a href="/" class="nav-brand" style="justify-content:center; margin-bottom:16px;">
+            <img src="{{ url_for('static', filename='nexuscv-logo.svg') }}" style="height:32px;" alt="Nexus CV">
+            <span class="nav-brand-text" style="font-size:22px;">Nexus CV</span>
+        </a>
+    </div>
+    <h2>Create Account</h2>
+    <p class="auth-subtitle">Sign up to get started</p>
+
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit" class="btn large" style="margin-top:12px;">
+            <span class="btn-text">Register</span>
+            <span class="btn-spinner"></span>
+        </button>
+    </form>
+
+    <div class="auth-divider"><span>or</span></div>
+
+    <a href="/login/google" class="btn google-btn large">
+        <img src="{{ url_for('static', filename='google.svg') }}" alt="Google">
+        Continue with Google
+    </a>
+
+    <p>Already have an account? <a href="/login">Login</a></p>
+</div>
+{% endblock %}

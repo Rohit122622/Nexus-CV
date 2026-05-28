@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}AI-Powered Resume Analysis & Builder{% endblock %}
+{% block description %}Nexus CV uses AI to analyze your resume, score ATS compatibility, and generate interview-ready resumes. Get career roadmaps and skill gap analysis.{% endblock %}
+{% block og_title %}AI-Powered Resume Analysis{% endblock %}
+{% block og_desc %}Analyze, compare, and build ATS-optimized resumes with AI-driven insights.{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+
+    <div class="hero-badge">
+        🧠 Multi-Agent AI • RAG • XGBoost
+    </div>
+
+    <h1 class="brand-title" style="animation: heroFloat 4s ease-in-out infinite;">
+        <span class="brand-main">AI Resume</span> <span class="brand-accent">Intelligence</span>
+    </h1>
+
+    <p class="tagline">
+        Turn your resume into an interview-ready profile with AI-powered analysis, generation, and ranking.
+    </p>
+
+    <div class="hero-buttons">
+        <a href="/upload-page" class="btn large" id="hero-analyze">📄 Analyze Resume</a>
+        <a href="/resume-builder" class="btn large outline" id="hero-generate">✨ Generate Resume</a>
+        <a href="/bulk-screen" class="btn large btn-fire" id="hero-bulk">🏆 Try Bulk Screening</a>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="features-grid">
+        <a href="/upload-page" class="feature-card" id="feature-analyze">
+            <span class="feature-icon">📄</span>
+            <h4>Analyze Resume</h4>
+            <p>Get ATS score, skill gaps, and career guidance</p>
+        </a>
+        <a href="/resume-builder" class="feature-card" id="feature-generate">
+            <span class="feature-icon">✨</span>
+            <h4>Generate Resume</h4>
+            <p>Build ATS-optimized resumes with AI</p>
+        </a>
+        <a href="/compare-resume" class="feature-card" id="feature-compare">
+            <span class="feature-icon">🔄</span>
+            <h4>Compare Resumes</h4>
+            <p>Track improvement between versions</p>
+        </a>
+        <a href="/bulk-screen" class="feature-card" id="feature-bulk" style="border: 1px solid transparent; background: linear-gradient(var(--bg-card), var(--bg-card)) padding-box, linear-gradient(135deg, #f59e0b, #ef4444) border-box;">
+            <span class="feature-icon">🏆</span>
+            <h4>Bulk Screening</h4>
+            <p>Rank candidates with Multi-Agent AI</p>
+        </a>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+        <div class="stat-item">
+            <div class="stat-number" data-count-up="4" data-suffix="">4</div>
+            <div class="stat-label">AI Agents</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-count-up="5" data-suffix="">5</div>
+            <div class="stat-label">Signal Hybrid</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-count-up="50" data-suffix="+">50+</div>
+            <div class="stat-label">Resumes at Once</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-count-up="100" data-suffix="%">100%</div>
+            <div class="stat-label">Bias-Free</div>
+        </div>
+    </div>
+
+</section>
+{% endblock %}

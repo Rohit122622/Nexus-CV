@@ -1,0 +1,58 @@
+<nav class="navbar" id="mainNavbar">
+    <!-- LEFT: Brand -->
+    <a href="/" class="nav-brand">
+        <img src="{{ url_for('static', filename='nexuscv-logo.svg') }}" alt="Nexus CV">
+        
+    </a>
+
+    <!-- CENTER: Nav Links -->
+    {% if session.get("user") %}
+    <div class="nav-links" id="navLinks">
+        <a href="/" {% if active_page=='home' %}class="active"{% endif %}>🏠 Home</a>
+        <a href="/upload-page" {% if active_page=='analyze' %}class="active"{% endif %}>📄 Analyze</a>
+        <a href="/resume-builder" {% if active_page=='generate' %}class="active"{% endif %}>✨ Generate</a>
+        <a href="/compare-resume" {% if active_page=='compare' %}class="active"{% endif %}>🔄 Compare</a>
+        <a href="/bulk-screen" class="nav-bulk {% if active_page=='bulk' %}active{% endif %}">🏆 Bulk Resume</a>
+        <a href="/dashboard" {% if active_page=='dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
+    </div>
+    {% endif %}
+
+    <!-- RIGHT: Theme + Auth -->
+    <div class="nav-right">
+        <!-- Dark mode toggle -->
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+            <span class="icon-moon">🌙</span>
+            <span class="icon-sun">☀️</span>
+        </button>
+
+        {% if session.get("user") %}
+        <!-- Hamburger (mobile) -->
+        <div class="nav-hamburger" onclick="toggleMobileNav()">
+            <span></span><span></span><span></span>
+        </div>
+
+        <!-- User Avatar + Dropdown -->
+        <div class="profile">
+            <div class="avatar" onclick="toggleMenu()">
+                {{ session["user"][0]|upper }}
+            </div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="/dashboard">📊 Dashboard</a>
+                <a href="/history">📋 History</a>
+                <div class="dropdown-divider"></div>
+                <a href="/upload-page">📄 Analyze Resume</a>
+                <a href="/resume-builder">✨ Generate Resume</a>
+                <a href="/compare-resume">🔄 Compare Resumes</a>
+                <a href="/bulk-screen">🏆 Bulk Screening</a>
+                <div class="dropdown-divider"></div>
+                <a href="/logout">🚪 Logout</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="nav-auth">
+            <a href="/login" class="btn outline small">Login</a>
+            <a href="/register" class="btn small">Register</a>
+        </div>
+        {% endif %}
+    </div>
+</nav>

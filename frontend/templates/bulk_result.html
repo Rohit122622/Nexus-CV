@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% set active_page = 'bulk' %}
+
+{% block title %}Best Candidates — Agentic Results{% endblock %}
+{% block description %}AI-ranked resume screening results with ReAct agent reasoning and evidence.{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    {% if result.error %}
+    <section class="card" style="border-left:4px solid var(--danger);">
+        <h3>⚠️ Error</h3>
+        <p>{{ result.error }}</p>
+        <a href="/bulk-screen" class="btn" style="margin-top:12px;">Try Again</a>
+    </section>
+    {% else %}
+
+    <div class="results-hero">
+        <h1>🏆 <span class="accent-text">Top {{ top_n }} Candidates Found</span></h1>
+        <p>Ranked using 5-Signal Hybrid: Multi-Agent AI + ML + Semantic RAG + XGBoost</p>
+    </div>
+
+    <!-- Agent Status -->
+    {% if result.agent_enabled %}
+    <div class="agent-banner active">
+        🧠 Agentic ReAct reasoning is ACTIVE — candidates evaluated with Thought → Action → Observation loop
+    </div>
+    {% else %}
+    <div class="agent-banner inactive">
+        ⚡ ML-only scoring mode — agent reasoning unavailable
+    </div>
+    {% endif %}
+
+    <div class="stats-row">
+        <span class="stat-chip">📄 {{ result.total_processed }} Resume{{ 's' if result.total_processed != 1 }} Analyzed</span>
+        <span class="stat-chip">🎯 Role: <b>{{ role }}</b></span>
+        <span class="stat-chip">🧠 {% if result.agent_enabled %}Agentic RAG{% else %}ML Scoring{% endif %}</span>
+        <span class="stat-chip">🔬 Evidence-Based</span>
+    </div>
+
+    <!-- TOP CANDIDATES -->
+    {% for candidate in result.top_candidates %}
+    <section class="card" style="border-left:4px solid {% if loop.index == 1 %}#f59e0b{% elif loop.index == 2 %}#94a3b8{% elif loop.index == 3 %}#cd7f32{% else %}#6366f1{% endif %};">
+
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+            <span class="trophy-label" style="color:{% if loop.index == 1 %}#f59e0b{% elif loop.index == 2 %}#94a3b8{% elif loop.index == 3 %}#cd7f32{% else %}#6366f1{% endif %};">
+                {% if loop.index == 1 %}🥇 BEST MATCH{% elif loop.index == 2 %}🥈 RUNNER UP{% elif loop.index == 3 %}🥉 THIRD PICK{% else %}🎯 #{{ loop.index }} CANDIDATE{% endif %}
+            </span>
+            {% if candidate.agent_confidence and candidate.agent_confidence != 'pending' %}
+            <span class="confidence-badge {{ candidate.agent_confidence }}">{{ candidate.agent_confidence }} confidence</span>
+            {% endif %}
+        </div>
+
+        <div class="candidate-header">
+            <div class="rank-badge rank-{{ loop.index }}">
+                #{{ candidate.rank }}
+            </div>
+            <div class="candidate-info">
+                <h3 class="candidate-name">{{ candidate.name or candidate.filename }}</h3>
+                {% if candidate.name and candidate.name != candidate.filename %}
+                <span class="candidate-file">{{ candidate.filename }}</span>
+                {% endif %}
+            </div>
+            <div class="score-circle">{{ candidate.score|int }}</div>
+        </div>
+
+        <div class="score-breakdown">
+            <span class="score-pill">🧠 Semantic: {{ candidate.semantic_score }}%</span>
+            <span class="score-pill">📊 ATS: {{ candidate.ats_score }}/100</span>
+            <span class="score-pill">🎯 Skill: {{ candidate.skill_match_pct }}%</span>
+            {% if candidate.agent_score %}
+            <span class="score-pill agent-pill">🤖 Agent: {{ (candidate.agent_score * 10)|int }}%</span>
+            {% endif %}
+            {% if candidate.xgboost_score %}
+            <span class="score-pill" style="border-color:rgba(234,179,8,0.3);background:rgba(234,179,8,0.06);color:#eab308;">⚙️ XGB: {{ candidate.xgboost_score }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Skills -->
+        {% if candidate.matched_skills %}
+        <div style="margin-top:16px;">
+            <b style="font-size:13px;">✅ Matched:</b><br>
+            {% for skill in candidate.matched_skills[:10] %}
+            <span class="skill-tag skill-matched">{{ skill }}</span>
+            {% endfor %}
+            {% if candidate.matched_skills|length > 10 %}
+            <span style="font-size:12px; color:var(--text-muted);">+{{ candidate.matched_skills|length - 10 }} more</span>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if candidate.missing_skills %}
+        <div style="margin-top:8px;">
+            <b style="font-size:13px;">❌ Missing:</b><br>
+            {% for skill in candidate.missing_skills[:6] %}
+            <span class="skill-tag skill-missing">{{ skill }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- AI Reasoning Accordion -->
+        <div class="accordion" id="reasoning-{{ loop.index }}">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>🤖 AI Reasoning</span>
+                <span class="accordion-chevron">▼</span>
+            </div>
+            <div class="accordion-content">
+                <div class="reason-box">{{ candidate.ai_explanation or candidate.reason }}</div>
+                {% if candidate.agent_evidence %}
+                <div class="evidence-section" style="margin-top:12px;">
+                    <b>📋 Evidence from Resume:</b>
+                    {% for ev in candidate.agent_evidence[:4] %}
+                    <div class="evidence-item">"{{ ev }}"</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </section>
+    {% endfor %}
+
+    <!-- ALL CANDIDATES TABLE -->
+    {% if result.all_results|length > top_n %}
+    <h2 style="margin-top:36px; text-align:center;">📊 Full Ranking</h2>
+    <section class="card" style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Candidate</th>
+                    <th style="text-align:center;">ATS</th>
+                    <th style="text-align:center;">Agent</th>
+                    <th style="text-align:center;">Final</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in result.all_results %}
+                <tr style="{% if loop.index <= 3 %}font-weight:600;{% endif %}">
+                    <td>{% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ r.rank }}{% endif %}</td>
+                    <td>{{ r.name or r.filename }}</td>
+                    <td style="text-align:center;">{{ r.ats_score }}/100</td>
+                    <td style="text-align:center;">
+                        {% if r.agent_score %}<span style="color:#8b5cf6; font-weight:600;">{{ (r.agent_score * 10)|int }}%</span>
+                        {% else %}<span style="opacity:0.3;">—</span>{% endif %}
+                    </td>
+                    <td style="text-align:center;"><span style="font-weight:700; color:var(--secondary);">{{ r.combined_score }}%</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% endif %}
+
+    <div class="formula-box">{{ result.scoring_details }}</div>
+
+    <div style="display:flex; justify-content:center; gap:16px; margin-top:32px; flex-wrap:wrap;">
+        <a href="/bulk-screen" class="btn large btn-fire">🔍 Screen More</a>
+        <a href="/" class="btn large outline">🏠 Home</a>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleAccordion(headerElement) {
+    const accordion = headerElement.parentElement;
+    accordion.classList.toggle('open');
+    const chevron = headerElement.querySelector('.accordion-chevron');
+    if (accordion.classList.contains('open')) {
+        chevron.style.transform = 'rotate(180deg)';
+    } else {
+        chevron.style.transform = 'rotate(0deg)';
+    }
+}
+</script>
+{% endblock %}

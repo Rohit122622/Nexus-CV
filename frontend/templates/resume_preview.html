@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% set active_page = 'generate' %}
+
+{% block title %}Resume Preview{% endblock %}
+{% block description %}Preview your AI-generated resume with ATS score before downloading.{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <h1 style="text-align:center; font-size:32px; font-weight:800; margin-bottom:16px;">📄 Your Generated Resume</h1>
+
+    <!-- ATS SCORE BADGE -->
+    <div style="text-align:center; margin:20px 0;">
+        <div class="ats-badge {% if ats_score >= 90 %}badge-excellent{% elif ats_score >= 80 %}badge-good{% else %}badge-low{% endif %}">
+            ATS Score: {{ ats_score }}%
+        </div>
+        <p style="color:var(--text-muted); margin-top:8px; font-size:14px;">
+            Target Role: <strong>{{ target_role }}</strong>
+        </p>
+    </div>
+
+    <!-- ATS BREAKDOWN -->
+    <section class="card">
+        <h3>📊 ATS Score Breakdown</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; text-align:center; margin-top:12px;">
+            <div>
+                <div style="font-size:24px; font-weight:800; color:var(--primary);">{{ ats_result.skill_score }}</div>
+                <div style="font-size:12px; color:var(--text-muted); font-weight:600;">Skills / 50</div>
+            </div>
+            <div>
+                <div style="font-size:24px; font-weight:800; color:var(--secondary);">{{ ats_result.keyword_score }}</div>
+                <div style="font-size:12px; color:var(--text-muted); font-weight:600;">Keywords / 30</div>
+            </div>
+            <div>
+                <div style="font-size:24px; font-weight:800; color:var(--accent);">{{ ats_result.completeness_score }}</div>
+                <div style="font-size:12px; color:var(--text-muted); font-weight:600;">Completeness / 20</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESUME PREVIEW -->
+    <section class="card resume-preview">
+        <div class="preview-header">
+            <h2 style="margin:0; text-align:center;">{{ resume.name }}</h2>
+            <p class="preview-contact">
+                {% if resume.email %}{{ resume.email }}{% endif %}
+                {% if resume.phone %} | {{ resume.phone }}{% endif %}
+                {% if resume.linkedin %} | {{ resume.linkedin }}{% endif %}
+                {% if resume.github %} | {{ resume.github }}{% endif %}
+                {% if resume.portfolio %} | {{ resume.portfolio }}{% endif %}
+            </p>
+        </div>
+        {% if resume.career_objective %}
+        <div class="preview-section"><h4 class="preview-heading">CAREER OBJECTIVE</h4><p>{{ resume.career_objective }}</p></div>
+        {% endif %}
+        {% if resume.education %}
+        <div class="preview-section"><h4 class="preview-heading">EDUCATION</h4>
+            {% for edu in resume.education %}
+            <p><strong>{{ edu.degree }}</strong>{% if edu.institution %} — {{ edu.institution }}{% endif %}{% if edu.year %} ({{ edu.year }}){% endif %}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if resume.experience %}
+        <div class="preview-section"><h4 class="preview-heading">WORK EXPERIENCE</h4>
+            {% for exp in resume.experience %}
+            <p style="margin-bottom:4px;"><strong>{{ exp.title }}</strong>{% if exp.company %} | {{ exp.company }}{% endif %}{% if exp.duration %} ({{ exp.duration }}){% endif %}</p>
+            <ul class="preview-bullets">{% for b in exp.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if resume.projects %}
+        <div class="preview-section"><h4 class="preview-heading">PROJECTS</h4>
+            {% for proj in resume.projects %}
+            <p style="margin-bottom:4px;"><strong>{{ proj.name }}</strong>{% if proj.tech %} | {{ proj.tech }}{% endif %}</p>
+            <ul class="preview-bullets">{% for b in proj.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if resume.skills_list %}
+        <div class="preview-section"><h4 class="preview-heading">TECHNICAL SKILLS</h4><p>{{ resume.skills_list | join(', ') }}</p></div>
+        {% endif %}
+        {% if resume.certifications_list %}
+        <div class="preview-section"><h4 class="preview-heading">CERTIFICATIONS</h4>
+            <ul class="preview-bullets">{% for c in resume.certifications_list %}<li>{{ c }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+        {% if resume.achievements_list %}
+        <div class="preview-section"><h4 class="preview-heading">ACHIEVEMENTS</h4>
+            <ul class="preview-bullets">{% for a in resume.achievements_list %}<li>{{ a }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- SKILLS -->
+    {% if ats_result.matched_skills %}
+    <section class="card">
+        <h3>✅ Matched Skills</h3>
+        {% for skill in ats_result.matched_skills %}<span class="skill-tag skill-matched">{{ skill }}</span>{% endfor %}
+    </section>
+    {% endif %}
+    {% if ats_result.missing_skills %}
+    <section class="card">
+        <h3>⚠️ Skills Not Covered</h3>
+        {% for skill in ats_result.missing_skills %}<span class="skill-tag skill-missing">{{ skill }}</span>{% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- ACTIONS -->
+    <div style="text-align:center; margin:32px 0 60px; display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+        <a href="/download-resume" class="btn large">📥 Download PDF</a>
+        <a href="/edit-resume" class="btn large outline">✏️ Edit Details</a>
+    </div>
+</div>
+{% endblock %}

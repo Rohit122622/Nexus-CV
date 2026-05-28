@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% set active_page = 'bulk' %}
+
+{% block title %}Smart Resume Selector{% endblock %}
+{% block description %}Upload multiple resumes and find the best candidates using AI-powered ranking.{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="bulk-hero">
+        <h1>🏆 <span class="accent-text">Smart Resume Selector</span></h1>
+        <p style="color:var(--text-muted);">Upload resumes to find the best candidates using Multi-Agent AI + ML</p>
+        <div class="feature-badges">
+            <span class="feature-badge">🧠 Multi-Agent AI</span>
+            <span class="feature-badge">📊 ML + XGBoost</span>
+            <span class="feature-badge">🎯 Semantic RAG</span>
+            <span class="feature-badge">🔒 Bias-Free</span>
+            <span class="feature-badge">⚡ Up to 50 Resumes</span>
+        </div>
+    </div>
+
+    <form method="POST" action="/bulk-screen" enctype="multipart/form-data" id="bulkForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <section class="card">
+            <h3>📄 Upload Resumes</h3>
+            <div class="upload-zone" id="dropZone">
+                <span class="upload-icon">📁</span>
+                <div class="upload-label">Drag & Drop files or click to browse</div>
+                <div class="upload-hint">PDF or ZIP (Agentic Extraction) • Max 50 resumes • 5MB per file</div>
+                <input type="file" id="fileInput" name="resumes" accept=".pdf,.zip" multiple>
+            </div>
+            <div id="fileCount" class="file-count"></div>
+            <div class="file-list-container" id="fileListContainer"></div>
+            <button type="button" class="btn outline small" id="addMoreBtn" style="margin-top:12px; display:none;">
+                ➕ Add More Files
+            </button>
+        </section>
+
+        <section class="card">
+            <h3>📋 Job Description</h3>
+            <textarea name="job_description" class="form-input" rows="8" required
+                placeholder="Paste the full job description here — the AI will semantically match candidates against it..."
+                style="width:100%; resize:vertical; min-height:140px;"></textarea>
+        </section>
+
+        <section class="card">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                <div>
+                    <h3>🎯 Target Role</h3>
+                    <input type="text" name="role" value="Software Engineer" class="form-input" style="width:100%;"
+                        placeholder="e.g. Software Engineer, Data Analyst, ML Engineer">
+                </div>
+                <div>
+                    <h3>🏅 Show Top N Candidates</h3>
+                    <input type="number" name="top_n" id="topNInput" min="1" max="50" value="3" class="form-input" style="width:100%;"
+                        placeholder="Number of top candidates">
+                    <div class="topn-warning" id="topnWarning">⚠️ Top N cannot exceed total files uploaded</div>
+                </div>
+            </div>
+        </section>
+
+        <div style="text-align:center; margin-top:24px; margin-bottom:24px;">
+            <button type="submit" class="btn large btn-fire" id="submitBtn">
+                <span class="btn-text">🔍 Find Best Candidates</span>
+                <span class="btn-spinner"></span>
+            </button>
+        </div>
+
+        <!-- Pipeline Preview -->
+        <div class="pipeline-stepper" id="bulkPipeline" style="opacity:0.5;">
+            <div class="pipeline-step" data-step="parsing">
+                <div class="step-dot">📄</div>
+                <div class="step-label">Parsing</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="pipeline-step" data-step="embedding">
+                <div class="step-dot">🧠</div>
+                <div class="step-label">Embedding</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="pipeline-step" data-step="agents">
+                <div class="step-dot">🤖</div>
+                <div class="step-label">Agents</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="pipeline-step" data-step="ranking">
+                <div class="step-dot">📊</div>
+                <div class="step-label">Ranking</div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<!-- Loading Overlay with Pipeline -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner-lg"></div>
+    <div class="loading-text" id="loadingText">Analyzing Resumes...</div>
+    <div class="loading-sub" id="loadingSub">Multi-Agent AI Pipeline</div>
+    <div class="pipeline-stepper" id="loadingPipeline" style="margin-top:24px;">
+        <div class="pipeline-step" data-step="parsing">
+            <div class="step-dot">📄</div>
+            <div class="step-label">Parsing</div>
+            <div class="step-line"></div>
+        </div>
+        <div class="pipeline-step" data-step="embedding">
+            <div class="step-dot">🧠</div>
+            <div class="step-label">Embedding</div>
+            <div class="step-line"></div>
+        </div>
+        <div class="pipeline-step" data-step="agents">
+            <div class="step-dot">🤖</div>
+            <div class="step-label">Agents</div>
+            <div class="step-line"></div>
+        </div>
+        <div class="pipeline-step" data-step="ranking">
+            <div class="step-dot">📊</div>
+            <div class="step-label">Ranking</div>
+            <div class="step-line"></div>
+        </div>
+        <div class="pipeline-step" data-step="complete">
+            <div class="step-dot">✅</div>
+            <div class="step-label">Done</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const fileInput = document.getElementById("fileInput");
+    const dropZone = document.getElementById("dropZone");
+    const fileListContainer = document.getElementById("fileListContainer");
+    const fileCountEl = document.getElementById("fileCount");
+    const addMoreBtn = document.getElementById("addMoreBtn");
+    const topNInput = document.getElementById("topNInput");
+    const topnWarning = document.getElementById("topnWarning");
+    let managedFiles = new DataTransfer();
+
+    function updateFileList() {
+        fileListContainer.innerHTML = "";
+        const files = managedFiles.files;
+        const count = files.length;
+        if (count === 0) { fileCountEl.innerText = ""; addMoreBtn.style.display = "none"; return; }
+        fileCountEl.innerText = count + " file" + (count !== 1 ? "s" : "") + " selected";
+        addMoreBtn.style.display = "inline-flex";
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const div = document.createElement("div");
+            div.className = "file-item";
+            const sizeKB = (file.size / 1024).toFixed(1);
+            const isZip = file.name.toLowerCase().endsWith('.zip');
+            div.innerHTML = `
+                <span class="file-name">${isZip ? '📦' : '📄'} ${file.name}</span>
+                <span class="file-size">${sizeKB} KB</span>
+                <button type="button" class="file-remove" onclick="removeFile(${i})" title="Remove">✕</button>
+            `;
+            if (isZip) {
+                const hint = document.createElement("span");
+                hint.style.cssText = "font-size:11px; color:var(--primary); margin-left:8px;";
+                hint.textContent = "(PDFs will be extracted on server)";
+                div.querySelector('.file-name').appendChild(hint);
+            }
+            fileListContainer.appendChild(div);
+        }
+        fileInput.files = managedFiles.files;
+        validateTopN();
+    }
+
+    function removeFile(index) {
+        const newDT = new DataTransfer();
+        const files = managedFiles.files;
+        for (let i = 0; i < files.length; i++) { if (i !== index) newDT.items.add(files[i]); }
+        managedFiles = newDT;
+        updateFileList();
+    }
+
+    function addFiles(newFiles) {
+        for (const file of newFiles) {
+            const name = file.name.toLowerCase();
+            if (!name.endsWith('.pdf') && !name.endsWith('.zip')) continue;
+            if (file.size > 5 * 1024 * 1024) continue;
+            if (managedFiles.files.length >= 50) break;
+            let isDuplicate = false;
+            for (let i = 0; i < managedFiles.files.length; i++) {
+                if (managedFiles.files[i].name === file.name && managedFiles.files[i].size === file.size) { isDuplicate = true; break; }
+            }
+            if (!isDuplicate) managedFiles.items.add(file);
+        }
+        updateFileList();
+    }
+
+    function validateTopN() {
+        const files = managedFiles.files;
+        let hasZip = false;
+        for (let i = 0; i < files.length; i++) { if (files[i].name.toLowerCase().endsWith('.zip')) { hasZip = true; break; } }
+        if (hasZip) { topnWarning.style.display = "none"; return; }
+        const topN = parseInt(topNInput.value) || 3;
+        if (topN > files.length && files.length > 0) {
+            topnWarning.style.display = "block";
+            topNInput.value = files.length;
+        } else {
+            topnWarning.style.display = "none";
+        }
+    }
+
+    fileInput.addEventListener("change", e => { if (e.target.files.length > 0) addFiles(e.target.files); });
+    addMoreBtn.addEventListener("click", () => {
+        const temp = document.createElement("input");
+        temp.type = "file"; temp.accept = ".pdf,.zip"; temp.multiple = true;
+        temp.onchange = () => addFiles(temp.files);
+        temp.click();
+    });
+    topNInput.addEventListener("input", validateTopN);
+    dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+    dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("dragover"); if (e.dataTransfer.files.length > 0) addFiles(e.dataTransfer.files); });
+
+    // Pipeline progress
+    function updateLoadingPipeline(stepId) {
+        const container = document.getElementById("loadingPipeline");
+        if (!container) return;
+        const steps = container.querySelectorAll(".pipeline-step");
+        const order = ["parsing", "embedding", "agents", "ranking", "complete"];
+        const idx = order.indexOf(stepId);
+        steps.forEach((step, i) => {
+            step.classList.remove("active", "done");
+            if (i < idx) step.classList.add("done");
+            else if (i === idx) step.classList.add("active");
+        });
+    }
+
+    function startProgressTracking() {
+        updateLoadingPipeline("parsing");
+        try {
+            const evtSource = new EventSource("/bulk-screen/progress");
+            evtSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    updateLoadingPipeline(data.step);
+                    const texts = {
+                        "parsing": "📄 Parsing resumes...",
+                        "embedding": "🧠 Creating embeddings...",
+                        "agents": "🤖 Running multi-agent analysis...",
+                        "ranking": "📊 Computing final rankings...",
+                        "complete": "✅ Analysis complete!"
+                    };
+                    document.getElementById("loadingText").innerText = texts[data.step] || "Processing...";
+                    if (data.detail) document.getElementById("loadingSub").innerText = data.detail;
+                    if (data.step === "complete") evtSource.close();
+                } catch(e) {}
+            };
+            evtSource.onerror = function() {
+                evtSource.close();
+                fallbackAnimation();
+            };
+        } catch(e) { fallbackAnimation(); }
+    }
+
+    function fallbackAnimation() {
+        const order = ["parsing", "embedding", "agents", "ranking"];
+        let idx = 0;
+        const interval = setInterval(() => {
+            if (idx < order.length) { updateLoadingPipeline(order[idx]); idx++; }
+            else clearInterval(interval);
+        }, 3000);
+    }
+
+    document.getElementById("bulkForm").addEventListener("submit", function(e) {
+        if (managedFiles.files.length === 0) { e.preventDefault(); NexusToast.error("Please select at least one PDF file"); return; }
+        document.getElementById("loadingOverlay").classList.add("active");
+        setButtonLoading(document.getElementById("submitBtn"), true, "Processing...");
+        startProgressTracking();
+    });
+</script>
+{% endblock %}

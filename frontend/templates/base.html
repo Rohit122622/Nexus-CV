@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nexus CV{% endblock %}</title>
+    <meta name="description" content="{% block description %}AI-Powered Resume Analysis, Comparison, and Building Platform{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}Nexus CV{% endblock %}">
+    <meta property="og:description" content="{% block og_desc %}AI-powered resume analysis and career guidance.{% endblock %}">
+    <meta property="og:image" content="/static/og-image.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Theme: apply BEFORE render to prevent flash -->
+    <script src="/static/theme.js"></script>
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    {% block navbar %}
+    {% include '_navbar.html' %}
+    {% endblock %}
+
+    <!-- ═══════════════ FLASH MESSAGES ═══════════════ -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container" style="padding-bottom:0; margin-bottom:-16px;">
+        {% for category, message in messages %}
+        {% if category == 'error' %}
+        <div class="validation-error-card">
+            <span class="error-icon">⚠️</span>
+            <div class="error-title">Error</div>
+            <p class="error-message">{{ message }}</p>
+        </div>
+        {% else %}
+        <div class="flash-message flash-{{ category }}">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+    {% block content %}{% endblock %}
+
+    <!-- ═══════════════ FOOTER BADGE ═══════════════ -->
+    {% block footer %}
+    <div style="text-align:center; padding: 24px 0 40px; position:relative; z-index:1;">
+        <div class="powered-badge">
+            ⚙️ Powered by Agentic AI Pipeline • Multi-Agent RAG
+        </div>
+    </div>
+    {% endblock %}
+
+    <!-- ═══════════════ GLOBAL SCRIPTS ═══════════════ -->
+    <script src="/static/script.js"></script>
+    {% block scripts %}{% endblock %}
+
+</body>
+
+</html>

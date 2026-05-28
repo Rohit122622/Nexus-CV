@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% set active_page = 'generate' %}
+
+{% block title %}AI Resume Builder{% endblock %}
+{% block description %}Build an ATS-optimized, recruiter-friendly resume with AI.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align:center; margin-bottom:32px;">
+        <h1 style="font-size:32px; font-weight:800;">✨ AI Resume Builder</h1>
+        <p style="color:var(--text-muted); margin-top:8px;">Fill in your details — we'll generate an ATS-optimized resume</p>
+    </div>
+
+    <form action="/generate-resume" method="post" class="builder-form" data-loading="Generating resume...">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- PERSONAL INFO -->
+        <section class="card builder-section">
+            <h3>👤 Personal Information</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="full_name">Full Name *</label>
+                    <input type="text" id="full_name" name="full_name" value="{{ prefill.get('name', '') }}" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" value="{{ prefill.get('email', '') }}" required placeholder="john@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone *</label>
+                    <input type="tel" id="phone" name="phone" value="{{ prefill.get('phone', '') }}" required placeholder="+91 9876543210">
+                </div>
+                <div class="form-group">
+                    <label for="linkedin">LinkedIn URL</label>
+                    <input type="url" id="linkedin" name="linkedin" value="{{ prefill.get('linkedin', '') }}" placeholder="https://linkedin.com/in/johndoe">
+                </div>
+                <div class="form-group">
+                    <label for="github">GitHub URL</label>
+                    <input type="url" id="github" name="github" value="{{ prefill.get('github', '') }}" placeholder="https://github.com/johndoe">
+                </div>
+                <div class="form-group">
+                    <label for="portfolio">Portfolio</label>
+                    <input type="url" id="portfolio" name="portfolio" value="{{ prefill.get('portfolio', '') }}" placeholder="https://johndoe.dev">
+                </div>
+            </div>
+        </section>
+
+        <!-- TARGET ROLE -->
+        <section class="card builder-section">
+            <h3>🎯 Target Role</h3>
+            <div class="form-group">
+                <label for="target_role">Select target job role (recommended for better ATS)</label>
+                <select id="target_role" name="target_role" class="form-select form-input">
+                    <option value="">Auto-detect from skills</option>
+                    <option value="Software Engineer" {{ 'selected' if prefill.get('target_role')=='Software Engineer' }}>Software Engineer</option>
+                    <option value="Web Developer" {{ 'selected' if prefill.get('target_role')=='Web Developer' }}>Web Developer</option>
+                    <option value="Backend Developer" {{ 'selected' if prefill.get('target_role')=='Backend Developer' }}>Backend Developer</option>
+                    <option value="Data Analyst" {{ 'selected' if prefill.get('target_role')=='Data Analyst' }}>Data Analyst</option>
+                    <option value="ML Engineer" {{ 'selected' if prefill.get('target_role')=='ML Engineer' }}>ML Engineer</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- CAREER OBJECTIVE -->
+        <section class="card builder-section">
+            <h3>🎯 Career Objective</h3>
+            <div class="form-group">
+                <label for="career_objective">Write a brief 2-3 line career objective *</label>
+                <textarea id="career_objective" name="career_objective" rows="3" required
+                    placeholder="Results-driven software engineer with 3+ years of experience...">{{ prefill.get('career_objective', '') }}</textarea>
+            </div>
+        </section>
+
+        <!-- EDUCATION -->
+        <section class="card builder-section">
+            <h3>🎓 Education</h3>
+            <div id="education-entries">
+                {% if prefill.get('education') %}
+                {% for edu in prefill.education %}
+                <div class="dynamic-entry">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Degree *</label><input type="text" name="edu_degree[]" value="{{ edu.degree }}" required placeholder="B.Tech Computer Science"></div>
+                        <div class="form-group"><label>Institution</label><input type="text" name="edu_institution[]" value="{{ edu.institution }}" placeholder="MIT"></div>
+                        <div class="form-group"><label>Year</label><input type="text" name="edu_year[]" value="{{ edu.year }}" placeholder="2020–2024"></div>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="removeEntry(this)">✕</button>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="dynamic-entry">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Degree *</label><input type="text" name="edu_degree[]" required placeholder="B.Tech Computer Science"></div>
+                        <div class="form-group"><label>Institution</label><input type="text" name="edu_institution[]" placeholder="MIT"></div>
+                        <div class="form-group"><label>Year</label><input type="text" name="edu_year[]" placeholder="2020–2024"></div>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="removeEntry(this)">✕</button>
+                </div>
+                {% endif %}
+            </div>
+            <button type="button" class="btn-add" onclick="addEducation()">+ Add Education</button>
+        </section>
+
+        <!-- WORK EXPERIENCE -->
+        <section class="card builder-section">
+            <h3>💼 Work Experience</h3>
+            <div id="experience-entries">
+                {% if prefill.get('experience') %}
+                {% for exp in prefill.experience %}
+                <div class="dynamic-entry">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Job Title</label><input type="text" name="exp_title[]" value="{{ exp.title }}" placeholder="Software Developer"></div>
+                        <div class="form-group"><label>Company</label><input type="text" name="exp_company[]" value="{{ exp.company }}" placeholder="Google"></div>
+                        <div class="form-group"><label>Duration</label><input type="text" name="exp_duration[]" value="{{ exp.duration }}" placeholder="Jan 2023 – Present"></div>
+                    </div>
+                    <div class="form-group" style="margin-top:8px;"><label>Description (one per line)</label><textarea name="exp_description[]" rows="3" placeholder="Built RESTful APIs using Flask&#10;Optimized database queries">{{ exp.bullets|join('\n') }}</textarea></div>
+                    <button type="button" class="btn-remove" onclick="removeEntry(this)">✕</button>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="dynamic-entry">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Job Title</label><input type="text" name="exp_title[]" placeholder="Software Developer"></div>
+                        <div class="form-group"><label>Company</label><input type="text" name="exp_company[]" placeholder="Google"></div>
+                        <div class="form-group"><label>Duration</label><input type="text" name="exp_duration[]" placeholder="Jan 2023 – Present"></div>
+                    </div>
+                    <div class="form-group" style="margin-top:8px;"><label>Description (one per line)</label><textarea name="exp_description[]" rows="3" placeholder="Built RESTful APIs using Flask&#10;Optimized database queries"></textarea></div>
+                    <button type="button" class="btn-remove" onclick="removeEntry(this)">✕</button>
+                </div>
+                {% endif %}
+            </div>
+            <button type="button" class="btn-add" onclick="addExperience()">+ Add Experience</button>
+        </section>
+
+        <!-- PROJECTS -->
+        <section class="card builder-section">
+            <h3>🚀 Projects</h3>
+            <div id="project-entries">
+                {% if prefill.get('projects') %}
+                {% for proj in prefill.projects %}
+                <div class="dynamic-entry">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Project Name</label><input type="text" name="proj_name[]" value="{{ proj.name }}" placeholder="AI Resume Analyzer"></div>
+                        <div class="form-group"><label>Technologies</label><input type="text" name="proj_tech[]" value="{{ proj.tech }}" placeholder="Python, Flask, ML"></div>
+                    </div>
+                    <div class="form-group" style="margin-top:8px;"><label>Description (one per line)</label><textarea name="proj_description[]" rows="3" placeholder="NLP-based resume parser&#10;ATS scoring with 95% accuracy">{{ proj.bullets|join('\n') }}</textarea></div>
+                    <button type="button" class="btn-remove" onclick="removeEntry(this)">✕</button>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="dynamic-entry">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Project Name</label><input type="text" name="proj_name[]" placeholder="AI Resume Analyzer"></div>
+                        <div class="form-group"><label>Technologies</label><input type="text" name="proj_tech[]" placeholder="Python, Flask, ML"></div>
+                    </div>
+                    <div class="form-group" style="margin-top:8px;"><label>Description (one per line)</label><textarea name="proj_description[]" rows="3" placeholder="NLP-based resume parser&#10;ATS scoring with 95% accuracy"></textarea></div>
+                    <button type="button" class="btn-remove" onclick="removeEntry(this)">✕</button>
+                </div>
+                {% endif %}
+            </div>
+            <button type="button" class="btn-add" onclick="addProject()">+ Add Project</button>
+        </section>
+
+        <!-- SKILLS -->
+        <section class="card builder-section">
+            <h3>🛠 Skills</h3>
+            <div class="form-group">
+                <label for="skills">Technical Skills (comma separated) *</label>
+                <textarea id="skills" name="skills" rows="2" required
+                    placeholder="Python, JavaScript, Flask, React, SQL, Git, Machine Learning">{{ prefill.get('skills_list', [])|join(', ') }}</textarea>
+            </div>
+        </section>
+
+        <!-- CERTIFICATIONS -->
+        <section class="card builder-section">
+            <h3>📜 Certifications (Optional)</h3>
+            <div class="form-group">
+                <label for="certifications">One per line (max 3)</label>
+                <textarea id="certifications" name="certifications" rows="3"
+                    placeholder="AWS Certified Solutions Architect&#10;Google TensorFlow Developer Certificate">{{ prefill.get('certifications', '') }}</textarea>
+            </div>
+        </section>
+
+        <!-- ACHIEVEMENTS -->
+        <section class="card builder-section">
+            <h3>🏆 Achievements (Optional)</h3>
+            <div class="form-group">
+                <label for="achievements">One per line (max 3)</label>
+                <textarea id="achievements" name="achievements" rows="3"
+                    placeholder="Won first prize at National Hackathon 2024&#10;Published research in IEEE">{{ prefill.get('achievements', '') }}</textarea>
+            </div>
+        </section>
+
+        <!-- SUBMIT -->
+        <div style="text-align:center; margin:32px 0 60px;">
+            <button type="submit" class="btn large">
+                <span class="btn-text">🚀 Generate Resume</span>
+                <span class="btn-spinner"></span>
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function removeEntry(btn) {
+        const entry = btn.closest('.dynamic-entry');
+        if (entry.parentElement.querySelectorAll('.dynamic-entry').length > 1) entry.remove();
+    }
+    function addEducation() {
+        document.getElementById('education-entries').insertAdjacentHTML('beforeend', `
+        <div class="dynamic-entry"><div class="form-grid">
+            <div class="form-group"><label>Degree *</label><input type="text" name="edu_degree[]" required placeholder="M.Sc Data Science"></div>
+            <div class="form-group"><label>Institution</label><input type="text" name="edu_institution[]" placeholder="Stanford"></div>
+            <div class="form-group"><label>Year</label><input type="text" name="edu_year[]" placeholder="2024–2026"></div>
+        </div><button type="button" class="btn-remove" onclick="removeEntry(this)">✕</button></div>`);
+    }
+    function addExperience() {
+        document.getElementById('experience-entries').insertAdjacentHTML('beforeend', `
+        <div class="dynamic-entry"><div class="form-grid">
+            <div class="form-group"><label>Job Title</label><input type="text" name="exp_title[]" placeholder="Developer"></div>
+            <div class="form-group"><label>Company</label><input type="text" name="exp_company[]" placeholder="Amazon"></div>
+            <div class="form-group"><label>Duration</label><input type="text" name="exp_duration[]" placeholder="2022–2023"></div>
+        </div><div class="form-group" style="margin-top:8px;"><label>Description</label><textarea name="exp_description[]" rows="3" placeholder="Designed microservices&#10;Reduced deployment time by 50%"></textarea></div>
+        <button type="button" class="btn-remove" onclick="removeEntry(this)">✕</button></div>`);
+    }
+    function addProject() {
+        document.getElementById('project-entries').insertAdjacentHTML('beforeend', `
+        <div class="dynamic-entry"><div class="form-grid">
+            <div class="form-group"><label>Project Name</label><input type="text" name="proj_name[]" placeholder="E-Commerce Platform"></div>
+            <div class="form-group"><label>Technologies</label><input type="text" name="proj_tech[]" placeholder="React, Node.js"></div>
+        </div><div class="form-group" style="margin-top:8px;"><label>Description</label><textarea name="proj_description[]" rows="3" placeholder="Built notification system&#10;Payment gateway integration"></textarea></div>
+        <button type="button" class="btn-remove" onclick="removeEntry(this)">✕</button></div>`);
+    }
+</script>
+{% endblock %}

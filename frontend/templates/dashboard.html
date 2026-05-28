@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% set active_page = 'dashboard' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block description %}Your Nexus CV dashboard — view stats, quick actions, and recent activity.{% endblock %}
+
+{% block content %}
+<div class="container-wide">
+
+    <h1 style="text-align:center; font-size:32px; font-weight:800; margin-bottom:32px;">📊 Dashboard</h1>
+
+    <!-- USER CARD -->
+    <section class="card">
+        <div class="user-card">
+            <div class="user-avatar-large">{{ session["user"][0]|upper }}</div>
+            <div class="user-info">
+                <h3>{{ session["user"] }}</h3>
+                <p>{{ session.get("email", "—") }}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="dash-grid" style="margin-bottom:24px;">
+        <section class="card dash-stat">
+            <span class="dash-stat-icon">📄</span>
+            <div class="dash-stat-value" data-count-up="{{ stats.total_analyzed }}" data-suffix="">{{ stats.total_analyzed }}</div>
+            <div class="dash-stat-label">Resumes Analyzed</div>
+        </section>
+        <section class="card dash-stat">
+            <span class="dash-stat-icon">🏆</span>
+            <div class="dash-stat-value" data-count-up="{{ stats.best_score }}" data-suffix="%">{{ stats.best_score }}%</div>
+            <div class="dash-stat-label">Best ATS Score</div>
+        </section>
+        <section class="card dash-stat">
+            <span class="dash-stat-icon">🕐</span>
+            <div class="dash-stat-value" style="font-size:18px; background:none; -webkit-text-fill-color:var(--text-primary); color:var(--text-primary);">{{ stats.last_activity or '—' }}</div>
+            <div class="dash-stat-label">Last Activity</div>
+        </section>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <section class="card">
+        <h3 style="margin-bottom:20px;">🚀 Quick Actions</h3>
+        <div class="quick-actions">
+            <a href="/upload-page" class="quick-action" id="qa-analyze">
+                <span class="quick-action-icon">📄</span>
+                <span class="quick-action-label">Analyze Resume</span>
+            </a>
+            <a href="/resume-builder" class="quick-action" id="qa-generate">
+                <span class="quick-action-icon">✨</span>
+                <span class="quick-action-label">Generate Resume</span>
+            </a>
+            <a href="/compare-resume" class="quick-action" id="qa-compare">
+                <span class="quick-action-icon">🔄</span>
+                <span class="quick-action-label">Compare Resumes</span>
+            </a>
+            <a href="/bulk-screen" class="quick-action highlight" id="qa-bulk">
+                <span class="quick-action-icon">🏆</span>
+                <span class="quick-action-label">🔥 Bulk Screening</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- RECENT ACTIVITY -->
+    <section class="card">
+        <h3>📋 Recent Activity</h3>
+        {% if records %}
+        <table style="margin-top:12px;">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>ATS Score</th>
+                    <th>Date</th>
+                    <th>Report</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records[:5] %}
+                <tr>
+                    <td>{{ r[0] }}</td>
+                    <td><span style="font-weight:700; color:var(--secondary);">{{ r[1] }}%</span></td>
+                    <td>{{ r[2] }}</td>
+                    <td>
+                        {% if r[3] %}
+                        <a href="/download-history-pdf?path={{ r[3] }}" class="btn small">📥 PDF</a>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if records|length > 5 %}
+        <div style="text-align:center; margin-top:16px;">
+            <a href="/history" class="btn outline small">View All History →</a>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-state-icon">📄</span>
+            <p class="empty-state-text">No analysis history yet. Start by analyzing a resume!</p>
+            <a href="/upload-page" class="btn">📄 Analyze Resume</a>
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

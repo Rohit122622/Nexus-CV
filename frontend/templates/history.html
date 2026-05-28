@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% set active_page = 'dashboard' %}
+
+{% block title %}Analysis History{% endblock %}
+{% block description %}View your past resume analysis results, ATS scores, and download reports.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="text-align:center; font-size:32px; font-weight:800; margin-bottom:32px;">📋 Analysis History</h1>
+
+    {% if records %}
+    <section class="card" style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>ATS Score</th>
+                    <th>Date</th>
+                    <th>Report</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{ r[0] }}</td>
+                    <td><span style="font-weight:700; color:var(--secondary);">{{ r[1] }}%</span></td>
+                    <td>{{ r[2] }}</td>
+                    <td>
+                        {% if r[3] %}
+                        <a href="/download-history-pdf?path={{ r[3] }}" class="btn small">📥 PDF</a>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% else %}
+    <section class="card">
+        <div class="empty-state">
+            <span class="empty-state-icon">📄</span>
+            <p class="empty-state-text">No analysis history found. Start by analyzing a resume!</p>
+            <a href="/upload-page" class="btn">📄 Analyze Resume</a>
+        </div>
+    </section>
+    {% endif %}
+
+    <div style="text-align:center; margin-top:32px; display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+        <a href="/upload-page" class="btn large">📄 Analyze Another</a>
+        <a href="/" class="btn outline">🏠 Home</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block navbar %}{% endblock %}
+
+{% block title %}Server Error{% endblock %}
+
+{% block content %}
+<div style="text-align:center; padding:80px 20px;">
+    <div style="font-size:80px; margin-bottom:16px; opacity:0.3;">⚠️</div>
+    <h1 style="font-size:48px; font-weight:900; margin-bottom:8px;">
+        <span class="brand-main">5</span><span class="brand-accent">0</span><span class="brand-main">0</span>
+    </h1>
+    <p style="font-size:18px; color:var(--text-muted); margin-bottom:12px;">
+        Something went wrong on our end.
+    </p>
+    <p style="font-size:14px; color:var(--text-muted); margin-bottom:32px;">
+        Please try again later or contact support if the issue persists.
+    </p>
+    <a href="/" class="btn large">🏠 Back to Home</a>
+</div>
+{% endblock %}

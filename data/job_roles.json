@@ -1,32 +1,17 @@
 {
-  "Software Engineer": [
-    "python",
-    "java",
-    "c++",
-    "data structures",
-    "sql",
-    "git"
-  ],
-  "Web Developer": [
-    "html",
-    "css",
-    "javascript",
-    "react",
-    "flask",
-    "sql"
-  ],
-  "Data Analyst": [
-    "python",
-    "sql",
-    "pandas",
-    "numpy",
-    "data analysis"
-  ],
-  "ML Engineer": [
-    "python",
-    "machine learning",
-    "deep learning",
-    "tensorflow",
-    "numpy"
-  ]
+  "Web Developer": ["html", "css", "javascript", "react", "vue", "angular", "bootstrap", "sass", "webpack", "git", "rest", "responsive design"],
+  "Backend Developer": ["python", "java", "node.js", "sql", "postgresql", "mongodb", "rest", "api", "docker", "linux", "git", "flask", "django"],
+  "Data Analyst": ["python", "sql", "pandas", "excel", "statistics", "power bi", "tableau", "data visualization", "numpy", "matplotlib", "r", "data cleaning"],
+  "Software Engineer": ["data structures", "algorithms", "java", "c++", "python", "git", "system design", "oop", "sql", "linux", "testing", "agile"],
+  "ML Engineer": ["python", "machine learning", "deep learning", "tensorflow", "pytorch", "numpy", "pandas", "scikit-learn", "nlp", "docker", "mlflow", "sql"],
+  "DevOps Engineer": ["docker", "kubernetes", "aws", "linux", "ci/cd", "terraform", "jenkins", "ansible", "git", "python", "monitoring", "nginx"],
+  "Frontend Developer": ["html", "css", "javascript", "react", "typescript", "next.js", "tailwind", "webpack", "git", "responsive design", "figma", "testing"],
+  "Full Stack Developer": ["javascript", "react", "node.js", "python", "sql", "mongodb", "html", "css", "git", "docker", "rest", "api", "typescript"],
+  "Data Scientist": ["python", "machine learning", "statistics", "pandas", "numpy", "sql", "tensorflow", "r", "data visualization", "deep learning", "nlp", "scikit-learn"],
+  "Mobile Developer": ["android", "ios", "react native", "flutter", "kotlin", "swift", "git", "rest", "api", "firebase", "java", "typescript"],
+  "Cloud Engineer": ["aws", "azure", "gcp", "docker", "kubernetes", "terraform", "linux", "python", "networking", "ci/cd", "security", "serverless"],
+  "Cybersecurity Analyst": ["cybersecurity", "networking", "linux", "python", "firewalls", "siem", "penetration testing", "encryption", "incident response", "vulnerability assessment", "compliance", "risk management"],
+  "Database Administrator": ["sql", "postgresql", "mysql", "oracle", "mongodb", "database design", "performance tuning", "backup recovery", "linux", "python", "replication", "security"],
+  "Product Manager": ["agile", "scrum", "roadmap", "user research", "data analysis", "sql", "stakeholder management", "a/b testing", "wireframing", "project management", "communication", "strategy"],
+  "QA Engineer": ["testing", "selenium", "automation", "python", "java", "jira", "api testing", "ci/cd", "git", "performance testing", "agile", "sql"]
 }

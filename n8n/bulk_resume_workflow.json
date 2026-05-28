@@ -1,0 +1,271 @@
+{
+  "name": "Nexus CV - Bulk Resume Pipeline (Production)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bulk-resume",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "1. Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "bulk-resume-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Auth Guard — Pass-through for trusted Flask backend calls\n// Flask backend is the only caller; no API key validation needed here\nconst items = $input.all();\nreturn items;"
+      },
+      "id": "auth-guard",
+      "name": "2. Auth Guard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract Files — Validate binary file is present from multipart upload\nconst itemsOut = [];\n\nfor (const item of items) {\n  if (item.binary && item.binary.file) {\n    itemsOut.push(item);\n  } else if (item.binary) {\n    // Try any binary key (n8n may use 'data' or other keys)\n    const keys = Object.keys(item.binary);\n    if (keys.length > 0) {\n      // Rename first binary key to 'file' for downstream compatibility\n      const firstKey = keys[0];\n      item.binary.file = item.binary[firstKey];\n      itemsOut.push(item);\n    } else {\n      throw new Error('No file received in binary data');\n    }\n  } else {\n    throw new Error('No file received in binary.file');\n  }\n}\n\nreturn itemsOut;"
+      },
+      "id": "extract-files",
+      "name": "3. Extract Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "pdf-extract",
+      "name": "4. PDF Text Extract",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pipeline 1: Data Processing\n// Clean text, detect sections, prepare for scoring\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const rawText = item.json.data || item.json.text || '';\n  \n  // Clean text\n  const cleanText = rawText\n    .replace(/\\r\\n/g, '\\n')\n    .replace(/\\n{3,}/g, '\\n\\n')\n    .replace(/[^\\x20-\\x7E\\n]/g, ' ')\n    .trim();\n  \n  // Detect sections for quality check\n  const sections = [];\n  const sectionPatterns = {\n    education: /education|academic|degree|university/i,\n    experience: /experience|employment|work history/i,\n    skills: /skills|technical|competencies/i,\n    projects: /projects|portfolio/i,\n    summary: /summary|objective|profile/i\n  };\n  \n  for (const [name, pattern] of Object.entries(sectionPatterns)) {\n    if (pattern.test(cleanText)) sections.push(name);\n  }\n  \n  // Carry forward body fields from webhook\n  const bodyData = items[0]?.json?.body || {};\n  \n  results.push({\n    json: {\n      file_name: item.json.file_name || item.binary?.file?.fileName || 'resume.pdf',\n      resume_text: cleanText,\n      word_count: cleanText.split(/\\s+/).length,\n      sections_detected: sections,\n      section_count: sections.length,\n      job_description: bodyData.job_description || item.json.job_description || 'Software Engineer with relevant skills',\n      role: bodyData.role || item.json.role || 'Software Engineer',\n      top_n: parseInt(bodyData.top_n || item.json.top_n) || 5,\n      pipeline_stage: 'P1_complete'\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "pipeline-1",
+      "name": "5. Pipeline 1: Data (No LLM)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-batches",
+      "name": "6. Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5000/api/v1/score",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $env.NEXUS_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"resume_text\": {{ JSON.stringify($json.resume_text) }},\n  \"role\": {{ JSON.stringify($json.role) }},\n  \"job_description\": {{ JSON.stringify($json.job_description) }},\n  \"run_agents\": true\n}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "score-resume",
+      "name": "7. Pipeline 2: Score (LLM)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1400, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Attach scoring result back to resume metadata\nconst scoreData = $input.first().json;\nreturn [{\n  json: {\n    file_name: scoreData.file_name || 'unknown',\n    ats_score: scoreData.ats_score || 0,\n    agent_score: scoreData.agent_score || 0,\n    confidence: scoreData.confidence || 'low',\n    reasoning: scoreData.reasoning || '',\n    evidence: scoreData.evidence || [],\n    matched_skills: scoreData.matched_skills || [],\n    missing_skills: scoreData.missing_skills || [],\n    thought_trace: scoreData.thought_trace || [],\n    pipeline_stage: 'P2_complete'\n  }\n}];"
+      },
+      "id": "collect-result",
+      "name": "8. Collect Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1600, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Rank & Shortlist — Sort by hybrid score, apply top_n\nconst items = $input.all();\nconst topN = items[0]?.json?.top_n || items.length;\n\nconst candidates = items.map((item, i) => {\n  const d = item.json;\n  return {\n    rank: 0,\n    file_name: d.file_name || `candidate_${i+1}`,\n    ats_score: d.ats_score || 0,\n    agent_score: d.agent_score || 0,\n    hybrid_score: Math.round((d.ats_score || 0) * 0.4 + (d.agent_score || 0) * 10 * 0.6),\n    confidence: d.confidence || 'low',\n    reasoning: d.reasoning || '',\n    evidence: d.evidence || [],\n    matched_skills: d.matched_skills || [],\n    missing_skills: d.missing_skills || []\n  };\n});\n\ncandidates.sort((a, b) => b.hybrid_score - a.hybrid_score);\nconst shortlisted = candidates.slice(0, topN).map((c, i) => ({\n  ...c, rank: i + 1, shortlisted: true\n}));\n\nreturn shortlisted.map(c => ({ json: c }));"
+      },
+      "id": "rank-shortlist",
+      "name": "9. Rank & Shortlist",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build Final Response\nconst items = $input.all();\nconst candidates = items.map(item => item.json);\n\nreturn [{\n  json: {\n    status: 'success',\n    processed: {\n      total_processed: candidates.length,\n      shortlisted: candidates.filter(c => c.shortlisted).length,\n      candidates: candidates,\n      pipeline: {\n        stage_1: 'data_processing (n8n)',\n        stage_2: 'intelligence (Flask API)',\n        orchestrator: 'n8n',\n        models_used: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'groq-llama-3.3'],\n        timestamp: new Date().toISOString()\n      }\n    }\n  }\n}];"
+      },
+      "id": "build-response",
+      "name": "10. Build Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1400, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "webhook-response",
+      "name": "11. Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1600, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Per-Resume Error Handler — don't crash entire pipeline\nconst error = $input.first().json;\nreturn [{\n  json: {\n    file_name: error.file_name || 'unknown',\n    ats_score: 0,\n    agent_score: 0,\n    confidence: 'low',\n    reasoning: 'Processing failed for this resume',\n    error: error.message || 'Unknown error',\n    pipeline_stage: 'P2_error'\n  }\n}];"
+      },
+      "id": "per-resume-error",
+      "name": "Per-Resume Error Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1400, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Global Error Handler\nreturn [{\n  json: {\n    success: false,\n    error: $input.first().json.message || 'Pipeline processing failed',\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "global-error",
+      "name": "Global Error Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1600, 100]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1800, 100]
+    }
+  ],
+  "connections": {
+    "1. Webhook Trigger": {
+      "main": [[
+        { "node": "2. Auth Guard", "type": "main", "index": 0 }
+      ]]
+    },
+    "2. Auth Guard": {
+      "main": [[
+        { "node": "3. Extract Files", "type": "main", "index": 0 }
+      ]]
+    },
+    "3. Extract Files": {
+      "main": [[
+        { "node": "4. PDF Text Extract", "type": "main", "index": 0 }
+      ]]
+    },
+    "4. PDF Text Extract": {
+      "main": [[
+        { "node": "5. Pipeline 1: Data (No LLM)", "type": "main", "index": 0 }
+      ]]
+    },
+    "5. Pipeline 1: Data (No LLM)": {
+      "main": [[
+        { "node": "6. Split In Batches", "type": "main", "index": 0 }
+      ]]
+    },
+    "6. Split In Batches": {
+      "main": [
+        [
+          { "node": "7. Pipeline 2: Score (LLM)", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "9. Rank & Shortlist", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "7. Pipeline 2: Score (LLM)": {
+      "main": [[
+        { "node": "8. Collect Result", "type": "main", "index": 0 }
+      ]]
+    },
+    "8. Collect Result": {
+      "main": [[
+        { "node": "6. Split In Batches", "type": "main", "index": 0 }
+      ]]
+    },
+    "9. Rank & Shortlist": {
+      "main": [[
+        { "node": "10. Build Response", "type": "main", "index": 0 }
+      ]]
+    },
+    "10. Build Response": {
+      "main": [[
+        { "node": "11. Webhook Response", "type": "main", "index": 0 }
+      ]]
+    },
+    "Global Error Handler": {
+      "main": [[
+        { "node": "Error Response", "type": "main", "index": 0 }
+      ]]
+    },
+    "Per-Resume Error Handler": {
+      "main": [[
+        { "node": "6. Split In Batches", "type": "main", "index": 0 }
+      ]]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "nexus-cv-pipeline-v5",
+  "id": "nexus-bulk-pipeline",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "nexus-cv-production"
+  },
+  "tags": [
+    { "name": "production" },
+    { "name": "bulk-resume" },
+    { "name": "pipeline" }
+  ]
+}

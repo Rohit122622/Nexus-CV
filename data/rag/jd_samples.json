@@ -1,0 +1,92 @@
+[
+  {
+    "role": "Software Engineer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "We are looking for a Software Engineer to design, develop, and maintain scalable software solutions. Requirements: 3+ years experience in Python, Java, or Go. Strong understanding of data structures and algorithms. Experience with RESTful APIs, microservices, and cloud platforms (AWS/GCP). Familiarity with CI/CD pipelines, Docker, and Kubernetes. Bachelor's in Computer Science or related field."
+  },
+  {
+    "role": "Data Scientist",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Seeking a Data Scientist to build predictive models and drive data-driven insights. Requirements: 2+ years in machine learning and statistical modeling. Proficiency in Python, pandas, scikit-learn, and SQL. Experience with deep learning frameworks (TensorFlow/PyTorch). Strong communication skills for presenting findings to stakeholders. Master's degree preferred."
+  },
+  {
+    "role": "Web Developer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Looking for a Web Developer to build responsive, performant web applications. Requirements: Proficiency in HTML5, CSS3, JavaScript, and React or Vue.js. Experience with REST APIs and backend frameworks (Node.js, Django, or Flask). Understanding of web accessibility, SEO best practices, and performance optimization. Experience with Git and agile methodologies."
+  },
+  {
+    "role": "ML Engineer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "We need an ML Engineer to deploy and optimize machine learning models in production. Requirements: 3+ years in ML engineering or related role. Experience with model serving (TensorFlow Serving, TorchServe, ONNX). Proficiency in Python, Docker, and Kubernetes. Familiarity with MLOps tools (MLflow, Kubeflow, Airflow). Strong understanding of model monitoring and A/B testing."
+  },
+  {
+    "role": "DevOps Engineer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Hiring a DevOps Engineer to manage cloud infrastructure and CI/CD pipelines. Requirements: 3+ years experience with AWS, Azure, or GCP. Proficiency in Infrastructure as Code (Terraform, CloudFormation). Experience with Docker, Kubernetes, and container orchestration. Strong Linux administration skills. Familiarity with monitoring tools (Prometheus, Grafana, DataDog)."
+  },
+  {
+    "role": "Data Analyst",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Seeking a Data Analyst to analyze business data and create actionable insights. Requirements: Proficiency in SQL and Excel. Experience with BI tools (Tableau, Power BI, or Looker). Basic Python or R for statistical analysis. Strong analytical thinking and attention to detail. Bachelor's degree in Business, Statistics, or related field."
+  },
+  {
+    "role": "Frontend Developer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Looking for a Frontend Developer to build modern user interfaces. Requirements: 2+ years with React, TypeScript, and CSS frameworks. Experience with state management (Redux, Zustand). Understanding of responsive design and cross-browser compatibility. Familiarity with testing frameworks (Jest, Cypress). Experience with design systems and component libraries."
+  },
+  {
+    "role": "Backend Developer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Hiring a Backend Developer to build scalable APIs and services. Requirements: 3+ years with Python (FastAPI/Django) or Node.js (Express). Experience with SQL and NoSQL databases. Understanding of API design, authentication, and rate limiting. Familiarity with message queues (RabbitMQ, Kafka) and caching (Redis). Experience with Docker and cloud deployment."
+  },
+  {
+    "role": "Cloud Engineer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Seeking a Cloud Engineer to design and manage cloud infrastructure. Requirements: AWS or Azure certification preferred. Experience with IaC tools (Terraform). Knowledge of networking, security groups, and IAM policies. Experience with serverless architectures (Lambda, Azure Functions). Strong troubleshooting skills."
+  },
+  {
+    "role": "Full Stack Developer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Looking for a Full Stack Developer to build end-to-end web applications. Requirements: Proficiency in React/Next.js and Node.js. Experience with PostgreSQL or MongoDB. Understanding of authentication, authorization, and security best practices. Familiarity with Docker and cloud deployment. Strong problem-solving skills."
+  },
+  {
+    "role": "Cybersecurity Analyst",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Hiring a Cybersecurity Analyst for threat detection and incident response. Requirements: 2+ years in cybersecurity. Experience with SIEM tools (Splunk, QRadar). Knowledge of network security, vulnerability assessment, and penetration testing. Security certifications (CompTIA Security+, CEH) preferred. Proficiency in Python for scripting and automation."
+  },
+  {
+    "role": "Product Manager",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Seeking a Product Manager to lead product strategy and execution. Requirements: 3+ years in product management. Experience with Agile/Scrum methodologies. Strong data analysis skills. Excellent stakeholder management and communication abilities. MBA or equivalent experience preferred."
+  },
+  {
+    "role": "Mobile Developer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Looking for a Mobile Developer to build cross-platform mobile applications. Requirements: Experience with React Native or Flutter. Knowledge of native development (Android/Kotlin or iOS/Swift). Experience with REST API integration and state management. Understanding of mobile UI/UX best practices and app store deployment."
+  },
+  {
+    "role": "QA Engineer",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Hiring a QA Engineer to ensure software quality through automated testing. Requirements: 2+ years in test automation. Experience with Selenium, Cypress, or Playwright. API testing with Postman or RestAssured. Understanding of CI/CD integration for automated tests. ISTQB certification preferred."
+  },
+  {
+    "role": "Database Administrator",
+    "category": "job_description",
+    "type": "jd",
+    "text": "Seeking a Database Administrator to manage and optimize database systems. Requirements: 3+ years with PostgreSQL, MySQL, or Oracle. Experience with query optimization, indexing, and performance tuning. Knowledge of database replication, backups, and disaster recovery. Familiarity with cloud-hosted databases (RDS, Cloud SQL)."
+  }
+]

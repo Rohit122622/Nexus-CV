@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% set active_page = 'compare' %}
+
+{% block title %}Resume Comparison Result{% endblock %}
+{% block description %}See how your updated resume compares: ATS score changes, skills added and removed, and AI analysis.{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <h1 style="text-align:center; font-size:32px; font-weight:800; margin-bottom:32px;">🔄 Comparison Results</h1>
+
+    <!-- SUMMARY -->
+    <section class="card">
+        <h3>📊 Improvement Summary</h3>
+        <p><b>Target Role:</b> {{ comparison.role }}</p>
+        <p style="margin-top:8px;">
+            <b>ATS Score:</b>
+            <span style="font-weight:700;">{{ comparison.ats_before }}</span> → <span style="font-weight:700;">{{ comparison.ats_after }}</span>
+            {% if comparison.ats_change > 0 %}
+            <span style="color:var(--success); font-weight:700;">↑ +{{ comparison.ats_change }}</span>
+            {% elif comparison.ats_change < 0 %}
+            <span style="color:var(--danger); font-weight:700;">↓ {{ comparison.ats_change }}</span>
+            {% else %}
+            <span style="color:var(--text-muted);">→ No change</span>
+            {% endif %}
+        </p>
+    </section>
+
+    <!-- CHART -->
+    <section class="card">
+        <h3>📈 ATS Score Comparison</h3>
+        <canvas id="atsCompareChart" data-old="{{ comparison.ats_before }}" data-new="{{ comparison.ats_after }}" height="180"></canvas>
+    </section>
+
+    <!-- SKILLS ADDED -->
+    {% if comparison.skills_added %}
+    <section class="card">
+        <h3>✅ Skills Added</h3>
+        <div>
+            {% for skill in comparison.skills_added %}
+            <span class="skill-tag skill-matched">+ {{ skill }}</span>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- SKILLS REMOVED -->
+    {% if comparison.skills_removed %}
+    <section class="card">
+        <h3>❌ Skills Removed</h3>
+        <div>
+            {% for skill in comparison.skills_removed %}
+            <span class="skill-tag skill-missing">− {{ skill }}</span>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- JD MATCH -->
+    {% if comparison.jd_before and comparison.jd_after %}
+    <section class="card">
+        <h3>🎯 Job Description Match</h3>
+        <p><b>Before:</b> {{ comparison.jd_before.match_percentage }}%</p>
+        <p><b>After:</b> {{ comparison.jd_after.match_percentage }}%</p>
+    </section>
+    {% endif %}
+
+    <!-- AI SUMMARY -->
+    <section class="card highlight">
+        <h3>🤖 AI Analysis</h3>
+        {% if comparison.ai_summary %}
+        <p>{{ comparison.ai_summary }}</p>
+        {% else %}
+        <p>Both resume versions demonstrate similar alignment with the <b>{{ comparison.role }}</b> role.</p>
+        {% endif %}
+    </section>
+
+    <!-- GEMINI DEEP ANALYSIS -->
+    {% if ai_comparison %}
+    <section class="card" style="border-left:4px solid var(--secondary);">
+        <h3>🧠 Gemini AI Deep Analysis</h3>
+        <p style="font-size:1.1em; font-weight:600; margin-bottom:12px;">{{ ai_comparison.verdict }}</p>
+        <p style="color:var(--text-secondary);">{{ ai_comparison.verdict_reason }}</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;">
+            <div>
+                <h4 style="color:var(--success);">Version A Strengths</h4>
+                <ul style="padding-left:16px; margin-top:8px;">{% for s in ai_comparison.version_a_strengths %}<li>{{ s }}</li>{% endfor %}</ul>
+                <h4 style="color:var(--danger); margin-top:12px;">Version A Weaknesses</h4>
+                <ul style="padding-left:16px; margin-top:8px;">{% for w in ai_comparison.version_a_weaknesses %}<li>{{ w }}</li>{% endfor %}</ul>
+            </div>
+            <div>
+                <h4 style="color:var(--success);">Version B Strengths</h4>
+                <ul style="padding-left:16px; margin-top:8px;">{% for s in ai_comparison.version_b_strengths %}<li>{{ s }}</li>{% endfor %}</ul>
+                <h4 style="color:var(--danger); margin-top:12px;">Version B Weaknesses</h4>
+                <ul style="padding-left:16px; margin-top:8px;">{% for w in ai_comparison.version_b_weaknesses %}<li>{{ w }}</li>{% endfor %}</ul>
+            </div>
+        </div>
+
+        <div class="reason-box" style="margin-top:16px;">
+            <b>Recommendation:</b> {{ ai_comparison.recommendation }}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ACTIONS -->
+    <div style="text-align:center; margin-top:32px; display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+        <a href="/download-compare-report" class="btn large">📥 Download Report</a>
+        <a href="/compare-resume" class="btn large outline">🔄 Compare Again</a>
+        <a href="/history" class="btn outline">📋 History</a>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const canvas = document.getElementById("atsCompareChart");
+    const oldScore = parseInt(canvas.dataset.old);
+    const newScore = parseInt(canvas.dataset.new);
+    const isDark = document.body.classList.contains("dark");
+
+    new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: ["Resume V1 (Old)", "Resume V2 (New)"],
+            datasets: [{
+                label: "ATS Score",
+                data: [oldScore, newScore],
+                backgroundColor: ["rgba(251,146,60,0.85)", "rgba(99,102,241,0.85)"],
+                borderColor: ["rgba(251,146,60,1)", "rgba(99,102,241,1)"],
+                borderWidth: 2,
+                borderRadius: 12,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: { duration: 1400, easing: "easeOutQuart" },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? "#1e293b" : "#ffffff",
+                    titleColor: isDark ? "#f1f5f9" : "#0f172a",
+                    bodyColor: isDark ? "#cbd5e1" : "#334155",
+                    borderColor: isDark ? "rgba(99,102,241,0.3)" : "rgba(0,0,0,0.1)",
+                    borderWidth: 1, cornerRadius: 10, padding: 12
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true, max: 100,
+                    grid: { color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", drawBorder: false },
+                    ticks: { color: isDark ? "#94a3b8" : "#64748b", font: { family: "'Inter', sans-serif", weight: 500 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: isDark ? "#94a3b8" : "#64748b", font: { family: "'Inter', sans-serif", weight: 600, size: 13 } }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

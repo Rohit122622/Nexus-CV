@@ -1,6 +1,6 @@
-# ─── ResumeIQ .gitignore ───
+# ─── Nexus CV .gitignore ───
 
-# Environment
+# Environment & Secrets
 .env
 .venv/
 venv/
@@ -12,9 +12,14 @@ __pycache__/
 *.pyc
 *.pyo
 *.egg-info/
+*.egg
 dist/
 build/
 instance/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Database
 *.db
@@ -24,15 +29,29 @@ instance/
 logs/
 *.log
 
-# Uploads & Reports (user-generated)
+# Uploads & Reports (user-generated, runtime)
 uploads/
 reports/
+generated_reports/
 
 # IDE
 .vscode/
 .idea/
 *.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Node (if applicable)
+node_modules/
+
+# Archive (dev test files)
+archive/
+
+# Keep placeholder files in gitignored dirs
+!uploads/.gitkeep
+!reports/.gitkeep
+!logs/.gitkeep

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% set active_page = 'analyze' %}
+
+{% block title %}Resume Analysis Result{% endblock %}
+{% block description %}Your AI-generated resume analysis: ATS score, skill gaps, career roadmap, and improvement suggestions.{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    {% if validation_summary %}
+    <div class="validation-summary">
+        <div class="vs-item"><span class="vs-check">✔</span> Resume structure detected</div>
+        <div class="vs-item"><span class="vs-check">✔</span> Sections: {{ validation_summary.sections_found | join(", ") }}</div>
+        {% if validation_summary.jd_detected %}
+        <div class="vs-item"><span class="vs-check">✔</span> Job description validated</div>
+        {% endif %}
+        <div class="vs-item"><span class="vs-check">✔</span> Quality: {{ validation_summary.quality_score }}%</div>
+    </div>
+    {% endif %}
+
+    <h1 style="text-align:center; font-size:32px; font-weight:800; margin-bottom:32px;">📊 Resume Analysis Dashboard</h1>
+
+    <!-- ROLE PREDICTION -->
+    <section class="card">
+        <h3>🎯 Best Matching Roles</h3>
+        {% for r in roles %}
+        <div class="role-item {% if r.score == 100 %}active{% endif %}">
+            <div>
+                <strong>{{ r.role }}</strong><br>
+                <small style="opacity:0.75;">{{ r.reason }}</small>
+            </div>
+            <span style="font-weight:700;">{{ r.score }}%</span>
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- ATS SCORE — SVG Gauge -->
+    <section class="card">
+        <h3>📈 ATS Score</h3>
+        <div class="score-gauge" data-score="{{ ats_score }}"></div>
+        <div class="progress" style="margin-top:16px;">
+            <div class="progress-bar" data-score="{{ ats_score }}"></div>
+        </div>
+    </section>
+
+    <!-- ATS BREAKDOWN -->
+    <section class="card">
+        <h3>📊 ATS Score Breakdown</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; text-align:center; margin-top:12px;">
+            <div>
+                <div style="font-size:28px; font-weight:800; color:var(--primary);" data-count-up="{{ ats_breakdown.skill }}" data-suffix="">{{ ats_breakdown.skill }}</div>
+                <div style="font-size:12px; color:var(--text-muted); font-weight:600;">Skills / 50</div>
+            </div>
+            <div>
+                <div style="font-size:28px; font-weight:800; color:var(--secondary);" data-count-up="{{ ats_breakdown.keyword }}" data-suffix="">{{ ats_breakdown.keyword }}</div>
+                <div style="font-size:12px; color:var(--text-muted); font-weight:600;">Keywords / 30</div>
+            </div>
+            <div>
+                <div style="font-size:28px; font-weight:800; color:var(--accent);" data-count-up="{{ ats_breakdown.completeness }}" data-suffix="">{{ ats_breakdown.completeness }}</div>
+                <div style="font-size:12px; color:var(--text-muted); font-weight:600;">Completeness / 20</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JD MATCH -->
+    <section class="card">
+        <h3>🎯 Job Description Match</h3>
+        <p><b>Match Percentage:</b> <span data-count-up="{{ jd_result.match_percentage }}" data-suffix="%">{{ jd_result.match_percentage }}%</span></p>
+        <p style="margin-top:12px;"><b>Missing for this Job Role:</b></p>
+        {% if jd_result.grouped_missing %}
+        {% for group, words in jd_result.grouped_missing.items() %}
+        <p style="margin-top:8px;"><strong>{{ group }}:</strong></p>
+        {% for w in words %}
+        <span class="skill-tag skill-missing">{{ w }}</span>
+        {% endfor %}
+        {% endfor %}
+        {% else %}
+        <p style="color:var(--text-muted);">No major missing keywords detected.</p>
+        {% endif %}
+    </section>
+
+    <!-- INSIGHTS -->
+    <section class="card">
+        <h3>🔍 Resume Insights</h3>
+        <p><b>Length:</b> {{ insights.length }}</p>
+        <p><b>Skill Density:</b> {{ insights.skill_density }}</p>
+        <p><b>Strength:</b> {{ insights.strength }}</p>
+        {% if insights.missing_sections %}
+        <p style="margin-top:8px;"><b>Missing Sections:</b></p>
+        {% for sec in insights.missing_sections %}
+        <span class="skill-tag skill-missing">{{ sec }}</span>
+        {% endfor %}
+        {% else %}
+        <p><b>All important sections present ✔</b></p>
+        {% endif %}
+    </section>
+
+    <!-- AI SUGGESTIONS -->
+    <section class="card highlight">
+        <h3>🤖 AI Improvement Suggestions</h3>
+        <ul style="list-style:none; padding:0;">
+            {% for s in suggestions %}
+            <li style="padding:6px 0;">✨ {{ s }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <!-- SKILLS -->
+    <section class="card">
+        <h3>🛠 Skills Analysis</h3>
+        <h4 style="margin-top:12px; font-size:14px; font-weight:600;">✅ Matched Skills</h4>
+        <div style="margin-top:8px;">
+            {% for skill in matched_skills %}
+            <span class="skill-tag skill-matched">{{ skill }}</span>
+            {% endfor %}
+        </div>
+
+        <h4 style="margin-top:20px; font-size:14px; font-weight:600;">❌ Missing Skills</h4>
+        {% if missing_classified.critical or missing_classified.optional %}
+        {% if missing_classified.critical %}
+        <p style="margin-top:8px;"><strong>Critical:</strong></p>
+        {% for skill in missing_classified.critical %}
+        <div class="skill">
+            <span>{{ skill }}</span>
+            <div class="bar bad"></div>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% if missing_classified.optional %}
+        <p style="margin-top:8px;"><strong>Optional:</strong></p>
+        {% for skill in missing_classified.optional %}
+        <div class="skill">
+            <span>{{ skill }}</span>
+            <div class="bar bad"></div>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% else %}
+        <p style="color:var(--text-muted); margin-top:8px;">No missing skills ✔</p>
+        {% endif %}
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="card">
+        <h3>🗺 Career Roadmap</h3>
+        {% if roadmap %}
+        <div style="margin-top:12px;">
+            {% for month, plan in roadmap.items() %}
+            <div style="padding:8px 0; border-bottom:1px solid var(--border-default);">
+                <strong style="color:var(--secondary);">{{ month }}</strong>
+                <p style="margin-top:4px; color:var(--text-secondary);">{{ plan }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted);">Your resume already meets the basic requirements 🎉</p>
+        {% endif %}
+    </section>
+
+    <!-- ACTIONS -->
+    <div style="text-align:center; margin-top:32px;">
+        <a href="/download-pdf" class="btn large">📥 Download PDF Report</a>
+        <a href="/upload-page" class="btn large outline">🔄 Analyze Another</a>
+    </div>
+
+</div>
+{% endblock %}

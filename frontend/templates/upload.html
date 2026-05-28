@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% set active_page = 'analyze' %}
+
+{% block title %}Upload Resume{% endblock %}
+{% block description %}Upload your resume for AI-powered ATS analysis, skill gap detection, and career guidance.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align:center; margin-bottom:32px;">
+        <h1 style="font-size:32px; font-weight:800; letter-spacing:-0.5px;">📄 AI Resume Analyzer</h1>
+        <p style="color:var(--text-muted); margin-top:8px;">Upload your resume and paste a job description to get your ATS score and career guidance</p>
+    </div>
+
+    <form action="/analyze" method="post" enctype="multipart/form-data" data-loading="Analyzing your resume...">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <section class="card">
+            <h3>📁 Upload Resume</h3>
+            <div class="upload-zone" id="uploadZone">
+                <span class="upload-icon">📄</span>
+                <div class="upload-label">Drag & Drop your resume or click to browse</div>
+                <div class="upload-hint">PDF files only • Max 5MB</div>
+                <input type="file" name="resume" accept=".pdf" required id="resumeInput">
+            </div>
+            <div id="selectedFile" class="file-count"></div>
+        </section>
+
+        <section class="card">
+            <h3>📋 Job Description</h3>
+            <div class="form-group">
+                <label for="job_description">Paste the target job description for role-specific analysis</label>
+                <textarea id="job_description" name="job_description" rows="6" required
+                    class="form-input"
+                    placeholder="Paste the full job description here — the AI will match your skills against it..."
+                    style="resize:vertical; min-height:140px;"></textarea>
+            </div>
+        </section>
+        <div style="text-align:center; margin-top:24px; margin-bottom:24px;">
+            <button type="submit" class="btn large" id="analyzeBtn">
+                <span class="btn-text">🔍 Analyze Resume</span>
+                <span class="btn-spinner"></span>
+            </button>
+        </div>
+
+        <!-- Pipeline Preview -->
+        <div class="pipeline-stepper" id="analysisPipeline" style="opacity:0.5;">
+            <div class="pipeline-step" data-step="parsing">
+                <div class="step-dot">📄</div>
+                <div class="step-label">Parse</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="pipeline-step" data-step="embedding">
+                <div class="step-dot">🧠</div>
+                <div class="step-label">Embed</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="pipeline-step" data-step="agents">
+                <div class="step-dot">🤖</div>
+                <div class="step-label">Agents</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="pipeline-step" data-step="scoring">
+                <div class="step-dot">📊</div>
+                <div class="step-label">Score</div>
+            </div>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // File name display
+    document.getElementById('resumeInput').addEventListener('change', function(e) {
+        const fileEl = document.getElementById('selectedFile');
+        if (e.target.files.length > 0) {
+            fileEl.textContent = '📄 ' + e.target.files[0].name;
+        }
+    });
+
+    // Upload zone hover
+    const zone = document.getElementById('uploadZone');
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); });
+</script>
+{% endblock %}
